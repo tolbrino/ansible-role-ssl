@@ -1,0 +1,2 @@
+---
+ssl_certbot_nginx_hooks: "--pre-hook 'systemctl stop nginx' --post-hook 'systemctl start nginx'"

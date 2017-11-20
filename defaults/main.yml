@@ -1,0 +1,8 @@
+---
+ssl_base_path: /etc/ssl
+ssl_certbot_certs: []
+ssl_certbot_email: admin@my.domain
+ssl_certbot_nginx: no
+ssl_certbot_nginx_hooks: ""
+ssl_certs: []
+ssl_dhparam_size: 2048

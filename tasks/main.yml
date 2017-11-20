@@ -1,0 +1,13 @@
+---
+
+- include_vars: "{{ item }}"
+  with_first_found:
+    - "../vars/{{ ansible_os_family }}.yml"
+    - "../vars/empty.yml"
+  tags: [always]
+
+- include_tasks: ssl.yml
+  tags: [ssl, ssl_custom]
+
+- include_tasks: certbot.yml
+  tags: [ssl, ssl_certbot]

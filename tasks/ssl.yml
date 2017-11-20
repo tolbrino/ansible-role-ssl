@@ -1,0 +1,36 @@
+---
+
+- name: Create SSL directories
+  file:
+    path: "{{ ssl_base_path }}/{{ item }}"
+    state: directory
+    owner: root
+    mode: 0600
+  with_items: "{{ ssl_certs | default([]) }}"
+
+- name: "Check if we've generated dhparams already"
+  stat:
+    path: "{{ ssl_base_path }}/{{ item }}/dhparam.pem"
+  register: ssl_dhparam_stats
+  with_items: "{{ ssl_certs | default([]) }}"
+
+- name: Generate dhparam
+  shell: "openssl dhparam -out {{ ssl_base_path }}/{{ item.item }}/dhparam.pem {{ ssl_dhparam_size }}"
+  when: not item.stat.exists
+  with_items: "{{ ssl_dhparam_stats.results }}"
+
+- name: Copy SSL certificates
+  copy:
+    src: "{{ item }}.crt.pem"
+    dest: "{{ ssl_base_path }}/{{ item }}/{{ item }}.crt.pem"
+    owner: root
+    mode: 0600
+  with_items: "{{ ssl_certs | default([]) }}"
+
+- name: Copy SSL private keys
+  copy:
+    src: "{{ item }}.key.pem"
+    dest: "{{ ssl_base_path }}/{{ item }}/{{ item }}.key.pem"
+    owner: root
+    mode: 0600
+  with_items: "{{ ssl_certs | default([]) }}"

@@ -42,7 +42,7 @@
 
 - name: "Check if we've generated certificates already"
   stat:
-    path: "{{ item.path }}/fullchain.pem"
+    path: "{{ ssl_certbot_base_path }}/{{ item }}/fullchain.pem"
   register: ssl_certbot_certs_stats
   with_items: "{{ ssl_certbot_certs | default([]) }}"
 
@@ -51,16 +51,17 @@
     name: nginx
     state: stopped
   when: ssl_certbot_nginx and ssl_certbot_certs_stats|json_query('results[?stat.exists==`false`]') != []
-  register: ssl_certbot_nginx_stopped
+  notify:
+    - start nginx
 
 - name: Generate certbot SSL certificates
-  shell: "certbot certonly --standalone --email {{ ssl_certbot_email }} --debug --non-interactive --agree-tos --expand --cert-name {{ item.item.domain }} -d {{ item.item.domain }}"
+  shell: "certbot certonly --standalone --email {{ ssl_certbot_email }} --debug --non-interactive --agree-tos --expand --cert-name {{ item.item }} -d {{ item.item }}"
   when: not item.stat.exists
   with_items: "{{ ssl_certbot_certs_stats.results }}"
 
 - name: Create SSL directories
   file:
-    path: "{{ item.path }}"
+    path: "{{ ssl_base_path }}/{{ item }}"
     state: directory
     mode: 0600
     owner: root
@@ -68,17 +69,11 @@
 
 - name: "Check if we've generated dhparams already"
   stat:
-    path: "{{ item.path }}/dhparam.pem"
+    path: "{{ ssl_base_path }}/{{ item }}/dhparam.pem"
   register: ssl_certbot_dhparam_stats
   with_items: "{{ ssl_certbot_certs | default([]) }}"
 
 - name: Generate dhparam
-  shell: "openssl dhparam -out {{ item.item.path }}/dhparam.pem {{ ssl_dhparam_size }}"
+  shell: "openssl dhparam -out {{ ssl_base_path}}/{{ item.item }}/dhparam.pem {{ ssl_dhparam_size }}"
   when: not item.stat.exists
   with_items: "{{ ssl_certbot_dhparam_stats.results }}"
-
-- name: Starting Nginx after running certbot
-  service:
-    name: nginx
-    state: started
-  when: ssl_certbot_nginx_stopped

@@ -1,3 +1,4 @@
 ---
 ssl_base_path: /usr/local/etc/ssl
 ssl_certbot_nginx_hooks: "--pre-hook 'service nginx stop' --post-hook 'service nginx start'"
+ssl_certbot_base_path: /usr/local/etc/letsencrypt/live

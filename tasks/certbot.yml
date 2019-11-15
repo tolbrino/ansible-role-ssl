@@ -10,7 +10,7 @@
   - name: (FreeBSD) Add cron job for 'certbot-auto renew'
     cron:
       name: Certbot automatic renewal.
-      job: "certbot renew --quiet --standalone {{ ssl_certbot_nginx_hooks }}"
+      job: "certbot-2.7 renew --quiet --standalone {{ ssl_certbot_nginx_hooks }}"
       special_time: daily
     when: ssl_certbot_nginx
 
